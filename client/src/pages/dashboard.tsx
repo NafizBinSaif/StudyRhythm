@@ -30,14 +30,18 @@ export default function Dashboard() {
 
   // Auto-generate daily plan when dashboard loads if no sessions exist and subjects are available
   useEffect(() => {
-    const today = format(new Date(), 'yyyy-MM-dd');
     const hasSubjects = subjects.length > 0;
     const hasSessions = sessions.length > 0;
     
     if (hasSubjects && !hasSessions && !generatePlanMutation.isPending) {
-      generatePlanMutation.mutate();
+      // Delay to ensure all queries are loaded
+      const timer = setTimeout(() => {
+        generatePlanMutation.mutate();
+      }, 500);
+      
+      return () => clearTimeout(timer);
     }
-  }, [subjects, sessions, generatePlanMutation]);
+  }, [subjects, sessions]);
 
   const userName = "Student";
 
