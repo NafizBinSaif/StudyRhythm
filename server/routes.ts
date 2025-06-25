@@ -351,8 +351,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const exams = await storage.getExams(currentUserId);
       const upcomingExams = exams.filter(exam => new Date(exam.date) >= new Date());
       
-      // Calculate study streak (simplified)
-      const studyStreak = 12; // Mock for now
+      // Calculate actual study streak
+      let studyStreak = 0;
+      const currentDate = new Date();
+      
+      // Check consecutive days with completed sessions
+      for (let i = 0; i < 30; i++) {
+        const checkDate = format(new Date(currentDate.getTime() - i * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+        const daySessions = await storage.getStudySessions(currentUserId, checkDate);
+        const hasCompletedSession = daySessions.some(s => s.completed);
+        
+        if (hasCompletedSession) {
+          studyStreak++;
+        } else if (i > 0) {
+          // If no completed session and not today, break streak
+          break;
+        } else if (i === 0) {
+          // Today has no completed sessions, streak is 0
+          studyStreak = 0;
+          break;
+        }
+      }
       
       // Calculate progress
       const totalMinutes = todaySessions.reduce((total, session) => {
