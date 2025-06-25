@@ -9,7 +9,7 @@ export default function BottomNavigation() {
     { path: "/", label: "Home", icon: Home },
     { path: "/schedule", label: "Schedule", icon: Calendar },
     { path: "/subjects", label: "Subjects", icon: BookOpen },
-    { path: "/progress", label: "Progress", icon: BarChart3 },
+    { path: "/exams", label: "Exams", icon: BarChart3 },
     { path: "/settings", label: "Settings", icon: Settings },
   ];
 

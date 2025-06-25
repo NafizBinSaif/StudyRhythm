@@ -215,30 +215,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Get subjects and topics
+      // Get subjects, topics, and exams
       const subjects = await storage.getSubjects(currentUserId);
       const exams = await storage.getExams(currentUserId);
       
-      // Simple algorithm to generate study sessions
+      // Collect all topics with priorities
+      const allTopics = [];
+      for (const subject of subjects) {
+        const topics = await storage.getTopics(subject.id);
+        allTopics.push(...topics);
+      }
+
+      // Smart algorithm to prioritize topics
+      const prioritizedTopics = allTopics
+        .filter(topic => !topic.completed)
+        .map(topic => {
+          let priority = 0;
+          
+          // Base priority from difficulty (harder topics get more time)
+          priority += topic.difficulty * 1.5;
+          
+          // Boost priority for incomplete topics
+          priority += 3;
+          
+          // Check if topic is part of upcoming exams
+          const relatedExams = exams.filter(exam => 
+            exam.topicIds.includes(topic.id) && 
+            new Date(exam.date) >= new Date()
+          );
+          
+          if (relatedExams.length > 0) {
+            const closestExam = relatedExams.reduce((closest, exam) => 
+              new Date(exam.date) < new Date(closest.date) ? exam : closest
+            );
+            
+            const daysUntilExam = Math.ceil((new Date(closestExam.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+            
+            // Higher priority for closer exams
+            if (daysUntilExam <= 7) priority += 5;
+            else if (daysUntilExam <= 14) priority += 3;
+            else if (daysUntilExam <= 30) priority += 2;
+          }
+          
+          // Boost priority for topics not studied recently
+          if (topic.lastStudied) {
+            const daysSinceStudied = Math.ceil((new Date().getTime() - new Date(topic.lastStudied).getTime()) / (1000 * 60 * 60 * 24));
+            if (daysSinceStudied > 7) priority += 2;
+            if (daysSinceStudied > 14) priority += 3;
+          } else {
+            // Never studied - high priority
+            priority += 4;
+          }
+          
+          return { ...topic, calculatedPriority: Math.min(priority, 10) };
+        })
+        .sort((a, b) => b.calculatedPriority - a.calculatedPriority);
+
+      // Generate study sessions
       const sessions = [];
       let currentTime = 9; // 9 AM
       const availableHours = user.dailyStudyHours;
       let hoursScheduled = 0;
+      const minSessionDuration = 0.5; // 30 minutes minimum
+      const maxSessionDuration = 2; // 2 hours maximum
 
-      for (const subject of subjects) {
+      for (const topic of prioritizedTopics) {
         if (hoursScheduled >= availableHours) break;
-
-        const topics = await storage.getTopics(subject.id);
-        const incompleteTopic = topics.find(t => !t.completed);
         
-        if (incompleteTopic && hoursScheduled < availableHours) {
-          const sessionDuration = Math.min(1.5, availableHours - hoursScheduled);
+        // Calculate session duration based on difficulty and priority
+        let sessionDuration = minSessionDuration;
+        
+        if (topic.difficulty >= 4) {
+          sessionDuration = Math.min(1.5, availableHours - hoursScheduled);
+        } else if (topic.difficulty >= 3) {
+          sessionDuration = Math.min(1, availableHours - hoursScheduled);
+        } else {
+          sessionDuration = Math.min(0.75, availableHours - hoursScheduled);
+        }
+        
+        // Ensure we don't exceed max session duration
+        sessionDuration = Math.min(sessionDuration, maxSessionDuration);
+        
+        if (sessionDuration >= minSessionDuration) {
           const endTime = currentTime + sessionDuration;
           
           const session = await storage.createStudySession({
             userId: currentUserId,
-            subjectId: subject.id,
-            topicId: incompleteTopic.id,
+            subjectId: topic.subjectId,
+            topicId: topic.id,
             scheduledDate: today,
             startTime: `${Math.floor(currentTime)}:${String(Math.floor((currentTime % 1) * 60)).padStart(2, '0')}`,
             endTime: `${Math.floor(endTime)}:${String(Math.floor((endTime % 1) * 60)).padStart(2, '0')}`,
@@ -246,13 +310,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           
           sessions.push(session);
-          currentTime = endTime + 0.5; // 30 min break
+          currentTime = endTime + (user.breakDuration / 60); // Add break time
           hoursScheduled += sessionDuration;
         }
       }
 
       res.json(sessions);
     } catch (error) {
+      console.error("Error generating study plan:", error);
       res.status(500).json({ message: "Failed to generate study plan" });
     }
   });
