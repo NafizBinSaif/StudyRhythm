@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, CheckCircle, Circle, Calculator, FlaskRound, Atom } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { Plus, CheckCircle, Circle, Calculator, FlaskRound, Atom, BookOpen } from "lucide-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { StudySession } from "@shared/schema";
+import type { StudySession, Subject, Topic } from "@shared/schema";
 
 interface TodayScheduleProps {
   sessions: StudySession[];
@@ -13,6 +13,23 @@ interface TodayScheduleProps {
 }
 
 export default function TodaySchedule({ sessions, onGenerateNewPlan, isGenerating }: TodayScheduleProps) {
+  const { data: subjects = [] } = useQuery({
+    queryKey: ["/api/subjects"],
+  });
+
+  const { data: allTopics = [] } = useQuery({
+    queryKey: ["/api/topics/all"],
+    queryFn: async () => {
+      const topicsArrays = await Promise.all(
+        subjects.map((subject: Subject) =>
+          fetch(`/api/subjects/${subject.id}/topics`).then(res => res.json())
+        )
+      );
+      return topicsArrays.flat();
+    },
+    enabled: subjects.length > 0,
+  });
+
   const toggleSessionMutation = useMutation({
     mutationFn: ({ id, completed }: { id: number; completed: boolean }) =>
       apiRequest("PATCH", `/api/study-sessions/${id}`, { completed }),
@@ -23,13 +40,25 @@ export default function TodaySchedule({ sessions, onGenerateNewPlan, isGeneratin
   });
 
   const getSubjectIcon = (subjectId: number) => {
-    // Simple mapping - in a real app, this would come from subject data
-    const icons = {
-      1: Calculator,
-      2: FlaskRound,
-      3: Atom,
+    const subject = subjects.find((s: Subject) => s.id === subjectId);
+    const iconMap = {
+      "fa-calculator": Calculator,
+      "fa-flask": FlaskRound,
+      "fa-atom": Atom,
+      "fa-book": BookOpen,
     };
-    return icons[subjectId as keyof typeof icons] || Calculator;
+    return iconMap[subject?.icon as keyof typeof iconMap] || BookOpen;
+  };
+
+  const getSubjectName = (subjectId: number) => {
+    const subject = subjects.find((s: Subject) => s.id === subjectId);
+    return subject?.name || `Subject ${subjectId}`;
+  };
+
+  const getTopicName = (topicId: number | null) => {
+    if (!topicId) return "General Review";
+    const topic = allTopics.find((t: Topic) => t.id === topicId);
+    return topic?.name || `Topic ${topicId}`;
   };
 
   const getDifficultyColor = (difficulty: number) => {
@@ -75,9 +104,9 @@ export default function TodaySchedule({ sessions, onGenerateNewPlan, isGeneratin
                       <SubjectIcon className="text-primary" />
                     </div>
                     <div className="flex-grow">
-                      <h4 className="font-medium">Subject {session.subjectId}</h4>
+                      <h4 className="font-medium">{getSubjectName(session.subjectId)}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Topic {session.topicId || "General"}
+                        {getTopicName(session.topicId)}
                       </p>
                       <div className="flex items-center mt-1">
                         <Badge className="mr-2" variant="secondary">

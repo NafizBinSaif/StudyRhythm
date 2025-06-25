@@ -92,7 +92,16 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      dailyStudyHours: insertUser.dailyStudyHours ?? 4,
+      preferredSessions: insertUser.preferredSessions ?? ["morning"],
+      breakDuration: insertUser.breakDuration ?? 10,
+      notifications: insertUser.notifications ?? true,
+      examAlerts: insertUser.examAlerts ?? true,
+      progressSummary: insertUser.progressSummary ?? false,
+    };
     this.users.set(id, user);
     return user;
   }
@@ -120,6 +129,8 @@ export class MemStorage implements IStorage {
     const subject: Subject = { 
       ...insertSubject, 
       id, 
+      icon: insertSubject.icon ?? "fa-book",
+      color: insertSubject.color ?? "#FF6F3C",
       createdAt: new Date() 
     };
     this.subjects.set(id, subject);
@@ -156,7 +167,9 @@ export class MemStorage implements IStorage {
     const id = this.currentTopicId++;
     const topic: Topic = { 
       ...insertTopic, 
-      id, 
+      id,
+      completed: insertTopic.completed ?? false,
+      lastStudied: insertTopic.lastStudied ?? null,
       createdAt: new Date() 
     };
     this.topics.set(id, topic);
@@ -226,7 +239,10 @@ export class MemStorage implements IStorage {
     const id = this.currentStudySessionId++;
     const session: StudySession = { 
       ...insertSession, 
-      id, 
+      id,
+      completed: insertSession.completed ?? false,
+      topicId: insertSession.topicId ?? null,
+      completedAt: insertSession.completedAt ?? null,
       createdAt: new Date() 
     };
     this.studySessions.set(id, session);

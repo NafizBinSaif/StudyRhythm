@@ -7,6 +7,8 @@ import Dashboard from "@/pages/dashboard";
 import Subjects from "@/pages/subjects";
 import Exams from "@/pages/exams";
 import Settings from "@/pages/settings";
+import Schedule from "@/pages/schedule";
+import Progress from "@/pages/progress";
 import NotFound from "@/pages/not-found";
 import AppHeader from "@/components/layout/app-header";
 import BottomNavigation from "@/components/layout/bottom-navigation";
@@ -20,6 +22,8 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/subjects" component={Subjects} />
           <Route path="/exams" component={Exams} />
+          <Route path="/schedule" component={Schedule} />
+          <Route path="/progress" component={Progress} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />
         </Switch>

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import SubjectForm from "@/components/forms/subject-form";
 import SubjectCard from "@/components/study/subject-card";
+import TopicManagement from "@/components/study/topic-management";
 import { Plus, BookOpen } from "lucide-react";
 import type { Subject } from "@shared/schema";
 
@@ -116,15 +117,32 @@ export default function Subjects() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {subjects.map((subject: Subject) => (
-            <SubjectCard
-              key={subject.id}
-              subject={subject}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {subjects.map((subject: Subject) => (
+              <SubjectCard
+                key={subject.id}
+                subject={subject}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+          
+          {/* Topic Management Section */}
+          {subjects.length > 0 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold">Manage Topics</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {subjects.map((subject: Subject) => (
+                  <TopicManagement
+                    key={subject.id}
+                    subject={subject}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
