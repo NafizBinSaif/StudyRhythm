@@ -317,7 +317,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(sessions);
     } catch (error) {
-      console.error("Error generating study plan:", error);
       res.status(500).json({ message: "Failed to generate study plan" });
     }
   });

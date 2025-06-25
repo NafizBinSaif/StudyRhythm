@@ -114,11 +114,14 @@ export default function TopicManagement({ subject }: TopicManagementProps) {
                 Add Topic
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px]" aria-describedby="topic-dialog-description">
               <DialogHeader>
                 <DialogTitle>
                   {selectedTopic ? "Edit Topic" : "Add New Topic"}
                 </DialogTitle>
+                <div id="topic-dialog-description" className="sr-only">
+                  {selectedTopic ? "Edit the selected topic's name and difficulty level" : "Create a new topic with name and difficulty level"}
+                </div>
               </DialogHeader>
               <TopicForm
                 topic={selectedTopic}

@@ -87,11 +87,14 @@ export default function Subjects() {
               Add Subject
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px]" aria-describedby="subject-dialog-description">
             <DialogHeader>
               <DialogTitle>
                 {selectedSubject ? "Edit Subject" : "Add New Subject"}
               </DialogTitle>
+              <div id="subject-dialog-description" className="sr-only">
+                {selectedSubject ? "Edit the selected subject's name, icon, and color" : "Create a new subject with name, icon, and color"}
+              </div>
             </DialogHeader>
             <SubjectForm
               subject={selectedSubject}

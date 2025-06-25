@@ -65,9 +65,13 @@ export default function ExamForm({ exam, subjects, onSubmit, isLoading }: ExamFo
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Exam Name</FormLabel>
+              <FormLabel htmlFor="exam-name">Exam Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Midterm Exam, Final..." {...field} />
+                <Input 
+                  id="exam-name"
+                  placeholder="e.g., Midterm Exam, Final..." 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
