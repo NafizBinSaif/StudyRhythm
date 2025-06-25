@@ -111,9 +111,14 @@ This is a full-stack study planner application built with a modern tech stack fe
 - **Production**: `npm run start` with optimized builds
 - **Database**: `npm run db:push` for schema deployment
 
-## Changelog
+## Recent Changes
 
-- June 25, 2025. Initial setup
+- June 25, 2025: Production-ready release with auto-generation, accessibility fixes
+- June 25, 2025: Fixed Generate Plan button functionality
+- June 25, 2025: Implemented automatic daily plan generation on dashboard load
+- June 25, 2025: Added proper ARIA labels and descriptions for accessibility
+- June 25, 2025: Fixed form label accessibility with proper htmlFor attributes
+- June 25, 2025: Cleaned production code and removed debug logging
 
 ## User Preferences
 

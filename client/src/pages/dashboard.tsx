@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { useEffect } from "react";
 import QuickStats from "@/components/study/quick-stats";
 import TodaySchedule from "@/components/study/today-schedule";
 import UpcomingExams from "@/components/study/upcoming-exams";
@@ -16,6 +17,10 @@ export default function Dashboard() {
     queryKey: ["/api/study-sessions", format(new Date(), 'yyyy-MM-dd')],
   });
 
+  const { data: subjects = [] } = useQuery({
+    queryKey: ["/api/subjects"],
+  });
+
   const generatePlanMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/study-sessions/generate"),
     onSuccess: () => {
@@ -23,7 +28,18 @@ export default function Dashboard() {
     },
   });
 
-  const userName = "Alex"; // In a real app, this would come from user context
+  // Auto-generate daily plan when dashboard loads if no sessions exist and subjects are available
+  useEffect(() => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const hasSubjects = subjects.length > 0;
+    const hasSessions = sessions.length > 0;
+    
+    if (hasSubjects && !hasSessions && !generatePlanMutation.isPending) {
+      generatePlanMutation.mutate();
+    }
+  }, [subjects, sessions, generatePlanMutation]);
+
+  const userName = "Student";
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

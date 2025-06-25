@@ -63,9 +63,13 @@ export default function SubjectForm({ subject, onSubmit, isLoading }: SubjectFor
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Subject Name</FormLabel>
+              <FormLabel htmlFor="subject-name">Subject Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Mathematics, Chemistry..." {...field} />
+                <Input 
+                  id="subject-name"
+                  placeholder="e.g., Mathematics, Chemistry..." 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

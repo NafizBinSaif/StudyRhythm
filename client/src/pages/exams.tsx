@@ -108,11 +108,14 @@ export default function Exams() {
               Add Exam
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px]" aria-describedby="exam-dialog-description">
             <DialogHeader>
               <DialogTitle>
                 {selectedExam ? "Edit Exam" : "Schedule New Exam"}
               </DialogTitle>
+              <div id="exam-dialog-description" className="sr-only">
+                {selectedExam ? "Edit the selected exam's title, date, and topics" : "Create a new exam with title, date, and topic selection"}
+              </div>
             </DialogHeader>
             <ExamForm
               exam={selectedExam}

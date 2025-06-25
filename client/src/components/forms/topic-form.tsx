@@ -61,9 +61,13 @@ export default function TopicForm({ topic, onSubmit, isLoading }: TopicFormProps
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Topic Name</FormLabel>
+              <FormLabel htmlFor="topic-name">Topic Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Linear Equations, Photosynthesis..." {...field} />
+                <Input 
+                  id="topic-name"
+                  placeholder="e.g., Linear Equations, Photosynthesis..." 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
